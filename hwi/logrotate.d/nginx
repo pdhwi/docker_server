@@ -1,0 +1,14 @@
+/hwi/nginx/logs/*.log {
+        su hwi hwi
+        daily
+        rotate 60
+        notifempty
+        dateext
+        sharedscripts
+		postrotate
+			# docker 中运行 Nginx，执行第一步的脚本
+			docker exec -d nginx /bin/sh /var/log/nginx/nginx.sh
+			# 宿主机运行 Nginx
+			# /bin/kill -USR1 $(/bin/cat /var/run/nginx.pid)
+		endscript
+}

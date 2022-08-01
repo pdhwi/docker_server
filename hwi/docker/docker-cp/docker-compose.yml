@@ -1,0 +1,115 @@
+version: "3"
+# 管理的服务
+services:
+  redis:
+    # 指定镜像
+    image: redis:${REDIS_VERSION}
+    container_name: redis
+    restart: always
+    ports:
+      # 端口映射
+      - "6379:6379"
+    volumes:
+      # 目录映射
+      - "${HWI_DIR}/redis/conf/redis.conf:/etc/redis/redis.conf"
+      - "${HWI_DIR}/redis/data:/data"
+    command:
+      # 执行的命令
+      redis-server /etc/redis/redis.conf
+    environment:
+     - TZ=Asia/Shanghai
+    networks:
+     - "hwi_service"
+     
+  mysql:
+    image: mysql:${MYSQL_VERSION}
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    restart: always
+    volumes:
+      - "${HWI_DIR}/mysql/data:/var/lib/mysql"
+      - "${HWI_DIR}/mysql/mysql.conf.d/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf"
+      - "${HWI_DIR}/mysql/logs:/var/log/mysql"
+    environment:
+      # 环境变量
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_ALLOW_EMPTY_PASSWORD:"yes"
+      - TZ=Asia/Shanghai
+    networks:
+      - "hwi_service"
+  php:
+    image: registry.cn-shenzhen.aliyuncs.com/bboyhwi/php72:1.0.0
+    container_name: php
+    restart: always
+    ports: 
+      - "9000:9000"
+    volumes: 
+      - ${HWI_DIR}/nginx/html:/var/www/html
+      - ${HWI_DIR}/php/php.ini:/usr/local/etc/php/php.ini
+      - ${HWI_DIR}/php/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
+      - ${HWI_DIR}/php/logs:/usr/local/log
+    environment:
+      - TZ=Asia/Shanghai
+    cap_add:
+      - SYS_PTRACE
+    networks: 
+      - hwi_service
+  phpWokeman:
+    image: registry.cn-shenzhen.aliyuncs.com/bboyhwi/php72:1.0.0
+    container_name: phpWokeman
+    restart: always
+    ports: 
+      - "9001:9000"
+      - "1238:1238"
+      - "8282:8282"
+      - "2900:2900"
+      - "2901:2901"
+      - "2902:2902"
+      - "2903:2903"
+    volumes: 
+      - ${HWI_DIR}/nginx/html:/var/www/html
+      - ${HWI_DIR}/phpWokeman/php.ini:/usr/local/etc/php/php.ini
+      - ${HWI_DIR}/phpWokeman/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
+    environment:
+      - TZ=Asia/Shanghai
+    networks: 
+      - hwi_service
+  php81:
+    image: registry.cn-shenzhen.aliyuncs.com/bboyhwi/php81:2.0
+    container_name: php81
+    restart: always
+    ports: 
+      - "9002:9000"
+    volumes: 
+      - ${HWI_DIR}/nginx/html:/var/www/html
+      - ${HWI_DIR}/php81/php.ini:/usr/local/etc/php/php.ini
+      - ${HWI_DIR}/php81/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
+      - ${HWI_DIR}/php81/logs:/usr/local/log
+    environment:
+      - TZ=Asia/Shanghai
+    cap_add:
+      - SYS_PTRACE
+    networks: 
+      - hwi_service
+  nginx:
+    image: nginx
+    container_name: nginx
+    restart: always
+    ports: 
+      - "80:80"
+      - "443:443"
+    volumes: 
+      - ${HWI_DIR}/nginx/html:/usr/share/nginx/html
+      - ${HWI_DIR}/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ${HWI_DIR}/nginx/conf.d:/etc/nginx/conf.d
+      - ${HWI_DIR}/nginx/logs:/var/log/nginx
+      - ${HWI_DIR}/nginx/cert:/etc/nginx/cert
+    environment:
+      - TZ=Asia/Shanghai
+    networks: 
+      - hwi_service
+
+networks:
+  hwi_service:
+    driver: bridge

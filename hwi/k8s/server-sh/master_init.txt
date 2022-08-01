@@ -1,0 +1,28 @@
+﻿#!/bin/bash
+
+
+#master 初始化
+kubeadm init \
+  --apiserver-advertise-address=172.18.145.85 \
+  --image-repository registry.aliyuncs.com/google_containers \
+  --kubernetes-version v1.15.0 \
+  --service-cidr=10.1.0.0/16 \
+  --pod-network-cidr=10.244.0.0/16
+  --ignore-preflight-errors=Numcpu
+
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+#网络插件
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/a70459be0084506e4ec919aa1c114638878db11b/Documentation/kube-flannel.yml
+
+
+
+kubeadm join 172.18.145.85:6443 --token n5n16w.ihtcg5pk76l4g0nt \
+    --discovery-token-ca-cert-hash sha256:503156ddb1be51b2aa0143081380c7cc187f2b81204c88d9090abcf218304533 
+
+
+
+eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkYXNoYm9hcmQtYWRtaW4tdG9rZW4tbWt6d3EiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGFzaGJvYXJkLWFkbWluIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiYjVhNjE0ZWUtNjIwNi00MjQ4LWI1NmItNzk0YTgzMGU5YWM4Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50Omt1YmUtc3lzdGVtOmRhc2hib2FyZC1hZG1pbiJ9.Fp9DkNGSpHnZZPgNioBIDLOuVeIEQvQDXGQ7PnIamXhh6IiVld8PJL5Q5EKoYXwWvRukKOsrPaWl-Veqluq1gV5kTOT_95WNolAToDK76xYF0Z61c2DtAlL8Z2BgcijfINsDFQGi9xxNmItbKl7Ns_02vKU409-rXGrxzhX7bPSrghISEwOpMYDydttGAdDSeVOkSqu5-8p0faD0t5544Soduf-Ro1J7CTIq5frTnmnqTwP3HtV0iLKay5yvyBX4PwYcae4AI55KFyx7PIvJptTAh5oXLTFVNBJPfd8lVlN93Zyq9zYNjota-PAuXu_p4BJ2P2vWpH3kNzRnZ-q3_w
